@@ -5,9 +5,9 @@ class Gate:
         self.name = name
         self.type = type
         self.inputs = inputs
-        self.output = output # a gate has one output only
+        self.output = output    # a gate has one output only
         self.no_inputs = self.__get_number_of_inputs
-        self.turn = turn    # turn is when will the gate be simulated
+        self.turn = turn    # turn is when the gate will be simulated (at which iteration)
 
     def __get_number_of_inputs(self):
         return len(self.inputs)

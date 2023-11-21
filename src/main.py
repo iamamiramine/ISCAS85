@@ -15,6 +15,7 @@ if __name__ == "__main__":
 
     parser = parse.Parser("circuits/c432.txt")
     c17 = parser.parse_iscas85()
+
     # print("Circuit name: " + c17.name)
 
     # print("Primary Inputs: ")
@@ -31,3 +32,7 @@ if __name__ == "__main__":
     #     print(" Gate: " + g.name, g.inputs, g.output)
 
     c17.simulate()
+    # TODO:
+    # create a file system for input vectors for each circuit
+    # store the output results for comparison
+    # implement concurrent fault simulation
