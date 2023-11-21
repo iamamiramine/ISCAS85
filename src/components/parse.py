@@ -8,7 +8,6 @@ class Parser:
     def __init__(self, file_name):
         self.file_name = file_name
         self.list_gates = {}
-        self.list_inputs = {}
         self.list_outputs = {}
         self.pi = {}
         self.po = {}
@@ -46,23 +45,24 @@ class Parser:
         gates = lines[4][12:-3]
 
         gates = gates.split(" + ")
-        for gate in gates:
-            gate = " ".join(re.findall("[a-zA-Z]+", gate))
-            gate_type = gate[:-1] if gate[-1] == "s" else gate
-            self.list_gates[gate_type] = []
+        # for gate in gates:
+        #     gate = " ".join(re.findall("[a-zA-Z]+", gate))
+        #     gate_type = gate[:-1] if gate[-1] == "s" else gate
+        #     self.list_gates[gate_type] = []
+
+        # if no_not != 0:
+        #     self.list_gates["NOT"] = []
 
         # Inputs
         for i in range(6, 6+no_inputs):
             name = int(re.search(r'\d+', lines[i]).group())
             pi = node.Node(name=name, type=0)
-            self.list_inputs[name] = pi
             self.pi[name] = pi
 
         # Outputs
         for i in range(6+no_inputs+1, 6+no_inputs+1+no_outputs):
             name = int(re.search(r'\d+', lines[i]).group())
             po = node.Node(name=name, type=1)
-            self.list_outputs[name] = po
             self.po[name] = po
 
         gate_counters = {
@@ -75,6 +75,7 @@ class Parser:
             "OR": 1
         }
 
+        gate_turn = 1
         for i in range(6+no_inputs+1+no_outputs+1, 6+no_inputs+1+no_outputs+1+no_gates+no_not):
             # print(lines[i].split())
             gate = " ".join(re.findall("[a-zA-Z]+", lines[i]))
@@ -82,60 +83,56 @@ class Parser:
             gate_input_list = {}
             gate_output_list = {}
 
-            if in_out[1] in self.list_inputs:    # Check if first input is in list of inputs
-                gate_input_list[in_out[1]] = self.list_inputs[in_out[1]]
-            elif in_out[1] in self.list_outputs: # Check if first input is in list of outputs
-                gate_input_list[in_out[1]] = self.list_outputs[in_out[1]]
-            else:   # Create a new input (this else is usually not called since the middle circuit output is created in the list of outputs)
-                gate_new_input = node.Node(name=in_out[1], type = 0)
-                gate_input_list[in_out[1]] = gate_new_input
-
-            if in_out[2] in self.list_inputs:    # Check if second input is in list of inputs
-                gate_input_list[in_out[2]] = self.list_inputs[in_out[2]]
-            elif in_out[2] in self.list_outputs: # Check if second input is in list of outputs
-                gate_input_list[in_out[2]] = self.list_outputs[in_out[2]]
-            else:   # Create a new input (this else is usually not called since the middle circuit output is created in the list of outputs)
-                gate_new_input = node.Node(name=in_out[2], type = 0)
-                gate_input_list[in_out[2]] = gate_new_input
-
+            outp = int(in_out[0])
             # Check if output already exists
-            if (in_out[0]) in self.list_outputs:
-                gate_output = self.list_outputs[in_out[0]]
-                gate_input_list[in_out[0]] = gate_output
+            if (outp) in self.po:
+                gate_output = self.po[outp]
+                gate_output_list[outp] = gate_output
             else: # Create new middle circuit output
-                gate_output = node.Node(name=in_out[0], type = 1)
-                gate_input_list[in_out[0]] = gate_output
+                gate_output = node.Node(name=outp, type = 1)
+                self.list_outputs[outp] = gate_output
+                gate_output_list[outp] = gate_output
+
+            for inp in in_out[1:]:
+                inp = int(inp)
+                if inp in self.pi:    # Check if input is in list of inputs
+                    gate_input_list[inp] = self.pi[inp]
+                elif inp in self.list_outputs: # Check if input is in list of outputs
+                    gate_input_list[inp] = self.list_outputs[inp]
+                    gate_turn+=1
+                else:
+                    print("ERROR")
 
             if(gate=="AND"):
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
-                self.list_gates[gate].append(g_.AND(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output))
+                self.list_gates[gate_name] = g_.AND(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
             elif(gate=="OR"):
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
-                self.list_gates[gate].append(g_.OR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output))
+                self.list_gates[gate_name] = g_.OR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
             elif(gate=="NOT"):
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
-                self.list_gates[gate].append(g_.NOT(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output))
+                self.list_gates[gate_name] = g_.NOT(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
             elif(gate=="XOR"):
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
-                self.list_gates[gate].append(g_.XOR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output))
+                self.list_gates[gate_name] = g_.XOR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
             elif(gate=="NAND"):
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
-                self.list_gates[gate].append(g_.NAND(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output))
+                self.list_gates[gate_name] = g_.NAND(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
             elif(gate=="NOR"):
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
-                self.list_gates[gate].append(g_.NOR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output))
+                self.list_gates[gate_name] = g_.NOR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
             elif(gate=="XNOR"):
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
-                self.list_gates[gate].append(g_.XNOR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output))
+                self.list_gates[gate_name] = g_.XNOR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
 
-        circuit = Circuit(name=circuit_name, gates=self.list_gates, pi = self.pi, po = self.po)
+        circuit = Circuit(name=circuit_name, gates=self.list_gates, pi = self.pi, po = self.po, max_turns=gate_turn)
 
         return circuit
 

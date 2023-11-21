@@ -13,3 +13,4 @@ class Node:
 
     def set_value(self, value):
         self.value = value
+        return self.value
