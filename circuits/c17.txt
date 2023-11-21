@@ -2,7 +2,7 @@
 # 5 inputs
 # 2 outputs
 # 0 inverter
-# 6 gates ( 6 NANDs + 4 NOTs + 1 AND )
+# 6 gates ( 6 NANDs)
 
 INPUT(1)
 INPUT(2)

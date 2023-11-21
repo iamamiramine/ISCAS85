@@ -1,7 +1,7 @@
 from .node import Node
 
 class Gate:
-    def __init__(self, name: str = '', type: str = '', inputs: list = [Node], output = Node):
+    def __init__(self, name: str = '', type: str = '', inputs: dict = {}, output: dict = {}):
         self.name = name
         self.type = type
         self.inputs = inputs
