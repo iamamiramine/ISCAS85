@@ -17,7 +17,7 @@ class Circuit:
             for gate in self.gates:
                 g = self.gates[gate]
                 if g.turn == gate_counter:
-                    # print("LEVEL: " + str(gate_counter))
+                    print("TURN: " + str(gate_counter))
                     g.calculate()
-                    # print(g.output.name)
-                    # print(g.output.value)
+                    print(g.output.name)
+                    print(g.output.value)

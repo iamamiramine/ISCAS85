@@ -16,20 +16,20 @@ if __name__ == "__main__":
     parser = parse.Parser("circuits/c432.txt")
     c17 = parser.parse_iscas85()
 
-    # print("Circuit name: " + c17.name)
+    print("Circuit name: " + c17.name)
 
-    # print("Primary Inputs: ")
-    # for pi in c17.pi:
-    #     print("Input name: " + str(c17.pi[pi].name) + ", Input value: " + str(c17.pi[pi].value))
+    print("Primary Inputs: ")
+    for pi in c17.pi:
+        print("Input name: " + str(c17.pi[pi].name) + ", Input value: " + str(c17.pi[pi].value))
 
-    # print("Primary Outputs: ")
-    # for po in c17.po:
-    #     print("Output name: " + str(c17.po[po].name) + ", Output value: " + str(c17.po[po].value))
+    print("Primary Outputs: ")
+    for po in c17.po:
+        print("Output name: " + str(c17.po[po].name) + ", Output value: " + str(c17.po[po].value))
 
-    # print("Gates: ")
-    # for gate in c17.gates:
-    #     g = c17.gates[gate]
-    #     print(" Gate: " + g.name, g.inputs, g.output)
+    print("Gates: ")
+    for gate in c17.gates:
+        g = c17.gates[gate]
+        print(" Gate: " + g.name, g.inputs, g.output)
 
     c17.simulate()
     # TODO:

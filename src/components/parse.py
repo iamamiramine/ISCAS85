@@ -76,6 +76,7 @@ class Parser:
         }
 
         gate_turn = 1
+        input_counter={}
         gate_max_line = output_max_line+1+no_gates+no_not
         for i in range(output_max_line+1, gate_max_line):
             gate = " ".join(re.findall("[a-zA-Z]+", lines[i]))  # get gate type
@@ -99,6 +100,13 @@ class Parser:
             # iterate over gate inputs
             for inp in in_out[1:]:
                 inp = int(inp)
+                # check if input has fanouts
+                if inp in input_counter:
+                    input_counter[inp] += 1
+                else:
+                    input_counter[inp] = 1
+
+            for inp in in_out[1:]:
                 # Checks if input already exists
                 # in the list of primary inputs
                 if inp in self.pi:
@@ -107,7 +115,7 @@ class Parser:
                 # in the list of middle circuit outputs
                 elif inp in self.list_outputs: # output of a gate can be an input of another
                     gate_input_list[inp] = self.list_outputs[inp]
-                    gate_turn+=1    # increment gate turn whenever it needs an input which depends on the output of another gate
+                    gate_turn+=1        # increment gate turn whenever it needs an input which depends on the output of another gate
                 else:
                     print("ERROR")      # not possible since gate input either exists as a primary input or as another gate output
                                         # cannot initialize input as a new input if it does not already exists as one of the two above states

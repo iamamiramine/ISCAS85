@@ -1,6 +1,6 @@
 class Node:
 
-    def __init__(self, name: int = 0, type: int = 0, value: int = 0, fanouts: list = []):
+    def __init__(self, name: int = 0, type: int = 0, value: int = 0, fanouts: dict = {}):
         '''
             type:
                 0: input
@@ -13,4 +13,7 @@ class Node:
 
     def set_value(self, value):
         self.value = value
+        if (len(self.fanouts)):
+            for fanout in self.fanouts:
+                self.fanouts[fanout].value = self.value
         return self.value
