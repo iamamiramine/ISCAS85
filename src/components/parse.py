@@ -52,7 +52,10 @@ class Parser:
         input_max_line = 6+no_inputs
         for i in range(6, input_max_line):
             name = int(re.search(r'\d+', lines[i]).group())
+            fanout_name = name + 0.1
             pi = node.Node(name=name, type=0)
+            fanout = {fanout_name: node.Node(name=fanout_name, type=0)}
+            pi.fanouts = fanout
             self.pi[name] = pi
 
         ''' Outputs '''
@@ -60,7 +63,10 @@ class Parser:
         output_max_line = input_max_line+1+no_outputs
         for i in range(input_max_line+1, output_max_line):
             name = int(re.search(r'\d+', lines[i]).group())
+            fanout_name = name + 0.1
             po = node.Node(name=name, type=1)
+            fanout = {fanout_name: node.Node(name=fanout_name, type=0)}
+            po.fanouts = fanout
             self.po[name] = po
 
         ''' Gates '''
@@ -77,6 +83,50 @@ class Parser:
 
         gate_turn = 1
         input_counter={}
+        gate_fanout_counter = {}
+        gate_max_line = output_max_line+1+no_gates+no_not
+        for i in range(output_max_line+1, gate_max_line):
+            gate = " ".join(re.findall("[a-zA-Z]+", lines[i]))  # get gate type
+            in_out = re.findall('\d+', lines[i])    # get gate inputs and outputs
+
+            outp = int(in_out[0])
+            if outp not in self.po:
+                gate_output = node.Node(name=outp, type = 1)
+                fanout_name = outp + 0.1
+                fanout = {fanout_name: node.Node(name=fanout_name, type=0)}
+                gate_output.fanouts = fanout
+                self.list_outputs[outp] = gate_output
+
+            # iterate over gate inputs
+            for inp in in_out[1:]:
+                inp = int(inp)
+                # check if input has fanouts
+                if inp in input_counter:
+                    input_counter[inp] += 1
+                else:
+                    input_counter[inp] = 1
+                gate_fanout_counter[inp] = 0
+
+        for input in input_counter:
+            if(input_counter[input] == 1):
+                if input in self.pi:
+                    self.pi[input].fanouts = {}
+                elif input in self.list_outputs:
+                    self.list_outputs[input].fanouts = {}
+            elif input_counter[input] > 1:
+                count = input_counter[input]
+                if input in self.pi:
+                    for i in range (0, count-1):
+                        pi_fanouts = self.pi[input].fanouts
+                        decimal = list(pi_fanouts.items())[-1][-1].name % 1
+                        fanout_name =float(f"{(self.pi[input].name + decimal + 0.1):.1f}")
+                        self.pi[input].fanouts[fanout_name] = node.Node(name=fanout_name, type=0)
+                elif input in self.list_outputs:
+                        pi_fanouts = self.list_outputs[input].fanouts
+                        decimal = list(pi_fanouts.items())[-1][-1].name % 1
+                        fanout_name = float(f"{(self.list_outputs[input].name + decimal + 0.1):.1f}")
+                        self.list_outputs[input].fanouts[fanout_name] = node.Node(name=fanout_name, type=0)
+
         gate_max_line = output_max_line+1+no_gates+no_not
         for i in range(output_max_line+1, gate_max_line):
             gate = " ".join(re.findall("[a-zA-Z]+", lines[i]))  # get gate type
@@ -93,28 +143,29 @@ class Parser:
                 gate_output = self.po[outp]
                 gate_output_list[outp] = gate_output
             else: # Create new middle circuit output
-                gate_output = node.Node(name=outp, type = 1)
-                self.list_outputs[outp] = gate_output
+                gate_output = self.list_outputs[outp]
                 gate_output_list[outp] = gate_output
 
-            # iterate over gate inputs
             for inp in in_out[1:]:
                 inp = int(inp)
-                # check if input has fanouts
-                if inp in input_counter:
-                    input_counter[inp] += 1
-                else:
-                    input_counter[inp] = 1
-
-            for inp in in_out[1:]:
                 # Checks if input already exists
                 # in the list of primary inputs
                 if inp in self.pi:
-                    gate_input_list[inp] = self.pi[inp]
+                    if len(self.pi[inp].fanouts):
+                        fanout = list(self.pi[inp].fanouts.items())[gate_fanout_counter[inp]]
+                        gate_fanout_counter[inp]+=1
+                        gate_input_list[fanout[0]] = fanout[1]
+                    else:
+                        gate_input_list[inp] = self.pi[inp]
                 # Checks if input already exists
                 # in the list of middle circuit outputs
                 elif inp in self.list_outputs: # output of a gate can be an input of another
-                    gate_input_list[inp] = self.list_outputs[inp]
+                    if len(self.list_outputs[inp].fanouts):
+                        fanout = list(self.list_outputs[inp].fanouts.items())[gate_fanout_counter[inp]]
+                        gate_fanout_counter[inp]+=1
+                        gate_input_list[fanout[0]] = fanout[1]
+                    else:
+                        gate_input_list[inp] = self.list_outputs[inp]
                     gate_turn+=1        # increment gate turn whenever it needs an input which depends on the output of another gate
                 else:
                     print("ERROR")      # not possible since gate input either exists as a primary input or as another gate output

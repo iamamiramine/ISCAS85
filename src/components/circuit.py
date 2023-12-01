@@ -8,10 +8,16 @@ class Circuit:
         self.max_turns = max_turns
 
     def simulate(self, test_vector: list = []):
-        test_vector = [0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1]
+        test_vector = [0,0,0,1,1] #,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,0,0,0,1,1,1]
         keys = list(self.pi.keys())
         for i, key in enumerate(keys):
             self.pi[key].set_value(test_vector[i])
+            if len(self.pi[key].fanouts):
+                for f in self.pi[key].fanouts:
+                    fanout = self.pi[key].fanouts[f]
+                    fanout.set_value(self.pi[key].value)
+                    print(fanout.name)
+                    print(fanout.value)
 
         for gate_counter in range(1, self.max_turns+1):
             for gate in self.gates:

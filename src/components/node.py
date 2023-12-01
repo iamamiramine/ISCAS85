@@ -1,6 +1,6 @@
 class Node:
 
-    def __init__(self, name: int = 0, type: int = 0, value: int = 0, fanouts: dict = {}):
+    def __init__(self, name: float = 0.0, type: int = 0, value: int = 0, fanouts: dict = {}):
         '''
             type:
                 0: input
