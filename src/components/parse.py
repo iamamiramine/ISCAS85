@@ -11,6 +11,7 @@ class Parser:
         self.pi = {}    # list of primary inputs
         self.po = {}    # list of primary outputs
         self.list_outputs = {}  # list of middle circuit outputs
+        self.list_fanouts = {}
 
     def parse_iscas85(self):
         """Parse ISCAS-85 netlist file and return a structured format."""
@@ -201,8 +202,20 @@ class Parser:
                 gate_counters[gate] +=1
                 self.list_gates[gate_name] = g_.XNOR(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
 
+        for pi in self.pi:
+            if len(self.pi[pi].fanouts):
+                for fanout in self.pi[pi].fanouts:
+                    fanout_name = self.pi[pi].fanouts[fanout].name
+                    self.list_fanouts[fanout_name] = self.pi[pi].fanouts[fanout]
+
+        for lo in self.list_outputs:
+            if len(self.list_outputs[lo].fanouts):
+                for fanout in self.list_outputs[lo].fanouts:
+                    fanout_name = self.list_outputs[lo].fanouts[fanout].name
+                    self.list_fanouts[fanout_name] = self.list_outputs[lo].fanouts[fanout]
+
         # Create circuit instance
-        circuit = Circuit(name=circuit_name, gates=self.list_gates, pi = self.pi, po = self.po, max_turns=gate_turn)
+        circuit = Circuit(name=circuit_name, gates=self.list_gates, pi = self.pi, list_outputs=self.list_outputs, list_fanouts=self.list_fanouts, po = self.po, max_turns=gate_turn)
 
         return circuit
 
