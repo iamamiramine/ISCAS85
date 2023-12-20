@@ -1,21 +1,8 @@
 from components import circuit, node, parse
 from components import gate as g_
+import serial
 
-if __name__ == "__main__":
-    # input1 = node.Node(type=0, value=0)
-    # input2 = node.Node(type=0, value=0)
-    # input3 = node.Node(type=0, value=0)
-    # input4 = node.Node(type=0, value=0)
-    # output1 = node.Node(1)
-    # xor2 = gate.NOR(name="XNOR2", type="XNOR", inputs=[input1, input2], output=output1)
-    # xor2.calculate()
-
-    # print(xor2.type)
-    # print(xor2.output.value)
-
-    parser = parse.Parser("circuits/c17.txt")
-    c17 = parser.parse_iscas85()
-
+def print(results):
     # print("Circuit name: " + c17.name)
 
     # print("Primary Inputs: ")
@@ -30,12 +17,10 @@ if __name__ == "__main__":
     # for gate in c17.gates:
     #     g = c17.gates[gate]
     #     print(" Gate: " + g.name, g.inputs, g.output)
+    return
 
-    # print(parser.list_outputs[11].fanouts)
-    print(c17.list_fanouts)
+if __name__ == "__main__":
+    parser = parse.Parser("circuits/c17.txt")
+    c17 = parser.parse_iscas85()
 
-    c17.simulate(test_vector=[0,0,0,1,1])
-    c17.fault_simulation(fault_site={11.2: 0})
-    c17.simulate(test_vector=[0,0,0,1,1])
-    # TODO:
-    # Compare: ratio detected faults/total faults
+    fault_coverage, test_vectors_faults, remianing_faults = serial.run_serial(c17, 'inputs/c17_input.txt')

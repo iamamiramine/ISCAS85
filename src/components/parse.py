@@ -82,6 +82,7 @@ class Parser:
             "OR": 1
         }
 
+        
         gate_turn = 1
         input_counter={}
         gate_fanout_counter = {}
@@ -97,7 +98,7 @@ class Parser:
                 fanout = {fanout_name: node.Node(name=fanout_name, type=0)}
                 gate_output.fanouts = fanout
                 self.list_outputs[outp] = gate_output
-
+            
             # iterate over gate inputs
             for inp in in_out[1:]:
                 inp = int(inp)
@@ -185,6 +186,10 @@ class Parser:
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
                 self.list_gates[gate_name] = g_.NOT(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
+            elif(gate=="BUFF"):
+                gate_name = gate + str(gate_counters[gate])
+                gate_counters[gate] +=1
+                self.list_gates[gate_name] = g_.BUFF(name = gate_name, type=gate, inputs=gate_input_list, output=gate_output, turn=gate_turn)
             elif(gate=="XOR"):
                 gate_name = gate + str(gate_counters[gate])
                 gate_counters[gate] +=1
