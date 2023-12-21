@@ -1,4 +1,5 @@
 import re
+import time
 
 from components.circuit import Circuit as C_
 from components import node, parse
@@ -36,6 +37,7 @@ def run_serial(circuit: C_, input_file: str='inputs/c17_inputs.txt'):
                 faults.append(fault_site)   # Adding faults from input file to dictionary
 
     '''Serial'''
+    start_time = time.time()
     for i in range(5, test_vector_max_lines): # Iterating through the test vectors
         test_vector = re.findall('\d+', lines[i]) # Read test vector
         test_vector_str = "".join(test_vector) # Convert test vector from list to string (if we used the test vector as a string immediately from text file, it will be in the form of '0,0,0,1,1\n')
@@ -70,6 +72,10 @@ def run_serial(circuit: C_, input_file: str='inputs/c17_inputs.txt'):
         for detected_fault in detected_faults: # Iterate over detected faults to remove from main faults dictionary so that we do not test them for other test vectors
             faults.remove(detected_fault)
  
+    end_time = time.time()
+    run_time = end_time - start_time
+    print(f"Serial Simulation Run Time: {run_time} seconds")
     fault_coverage = fault_count/no_saf # Fault Coverage
+    fault_efficiency = (fault_count/no_saf-len(faults))
 
-    return fault_coverage, test_vectors_faults, faults # Returns fault coverage, test vectors with the faults it detected, and undetectable faults
+    return fault_coverage, test_vectors_faults, fault_efficiency # Returns fault coverage, test vectors with the faults it detected, and fault efficiency
